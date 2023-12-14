@@ -1,0 +1,5 @@
+CLASS zbp_salesorder_hdr_i DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zsalesorder_hdr_i.
+ENDCLASS.
+
+CLASS zbp_salesorder_hdr_i IMPLEMENTATION.
+ENDCLASS.

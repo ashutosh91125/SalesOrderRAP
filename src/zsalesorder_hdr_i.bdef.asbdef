@@ -1,0 +1,78 @@
+managed implementation in class zbp_salesorder_hdr_i unique;
+
+
+define behavior for zsalesorder_hdr_i alias SalesOrder
+persistent table zsalesorder_hdr
+lock master
+authorization master ( instance )
+etag master CreatedAt
+{
+  create;
+  update;
+  delete;
+  association _Item { create; }
+  association _Message { create; }
+  action transferData result [1] $self;
+
+  mapping for zsalesorder_hdr{
+   Salesdocumentnumber = salesdocumentnumber;
+   Salesdist = salesdist;
+   Salesorg = Salesorg;
+   Accntasgn = Accntasgn;
+   Distrchan = Distrchan;
+   Division = Division;
+   Doctype = doctype;
+   Partnnumb = partnnumb;
+   Partnrole = partnrole;
+   Purchnoc = purchnoc;
+   Shipcond = shipcond;
+   Status = status;
+
+  }
+
+}
+
+define behavior for zsalesorder_item_i alias OrderItem
+persistent table zsalesorder_item
+lock dependent by _SalesOrder
+authorization dependent by _SalesOrder
+//etag master <field_name>
+{
+  update;
+  delete;
+  field ( readonly ) Salesdocumentnumber;
+  association _SalesOrder;
+
+  mapping for zsalesorder_item{
+
+    Itemnumber = itemnumber;
+    Itemcateg = itemcateg;
+    Salesdocumentnumber = salesdocumentnumber;
+    Material = material;
+    Plant = plant;
+    Targetqty = targetqty;
+    Targetqu = targetqu;
+
+  }
+}
+
+define behavior for zsalesorder_msg_i alias Message
+persistent table zsalesorder_msg
+lock dependent by _SalesOrder
+authorization dependent by _SalesOrder
+//etag master <field_name>
+{
+  update;
+  delete;
+  field ( readonly ) Salesdocumentnumber;
+  association _SalesOrder;
+
+  mapping for zsalesorder_msg{
+
+  MessageNo = message_no;
+  Salesdocumentnumber = salesdocumentnumber;
+  Comments = comments;
+
+  }
+
+}

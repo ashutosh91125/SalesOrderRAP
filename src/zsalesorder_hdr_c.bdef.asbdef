@@ -1,0 +1,28 @@
+projection;
+
+define behavior for zsalesorder_hdr_c //alias <alias_name>
+{
+  use create;
+  use update;
+  use delete;
+
+  use association _Item { create; }
+  use association _Message { create; }
+  use action transferData;
+}
+
+define behavior for zsalesorder_item_c //alias <alias_name>
+{
+  use update;
+  use delete;
+
+  use association _SalesOrder;
+}
+
+define behavior for zsalesorder_msg_c //alias <alias_name>
+{
+
+  use update;
+  use delete;
+  use association _SalesOrder;
+}

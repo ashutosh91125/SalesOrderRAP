@@ -1,0 +1,6 @@
+@EndUserText.label: 'service for Sales Order'
+define service Zsalesorder_s {
+  expose zsalesorder_hdr_c;
+  expose zsalesorder_item_c;
+  expose zsalesorder_msg_c;
+}

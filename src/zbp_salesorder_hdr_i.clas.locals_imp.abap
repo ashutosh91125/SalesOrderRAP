@@ -1,4 +1,5 @@
 CLASS lhc_SalesOrder DEFINITION INHERITING FROM cl_abap_behavior_handler.
+
   PRIVATE SECTION.
 
     METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
@@ -164,24 +165,34 @@ CLASS lhc_SalesOrder IMPLEMENTATION.
           lo_response->get_text(
             RECEIVING
               r_value = DATA(lv_response) ).
+
         CATCH cx_web_message_error.
 
       ENDTRY.
 
-       GET TIME STAMP FIELD DATA(lv_created_on).
+*     DATA: lv_resonse_vbeln type string,
+*        strln TYPE i,
+*        l_offset TYPE i,
+*        l_len TYPE i.
+*     strln = STRLEN( lv_response ).
+*     l_offset = strln - 47.
+*
+*     lv_resonse_vbeln = lv_response+l_offset(4).
 
-      DELETE FROM zsalesorder_msg WHERE salesdocumentnumber = @ls_key-Salesdocumentnumber.
+*       GET TIME STAMP FIELD DATA(lv_created_on).
+*
+*      DELETE FROM zsalesorder_msg WHERE salesdocumentnumber = @ls_key-Salesdocumentnumber.
+*
+*      IF ( ls_resp_status-code = '200' OR ls_resp_status-code = '201' ) . "and lo_response-data-d-Vbeln is not INITIAL.
+*
+*        UPDATE zsalesorder_hdr SET status =  3  , created_by = @sy-uname , created_at = @lv_created_on WHERE salesdocumentnumber = @ls_key-Salesdocumentnumber.
+*
+*      ELSE.
+*        UPDATE zsalesorder_hdr SET status = 4 , created_by = @sy-uname , created_at = @lv_created_on WHERE salesdocumentnumber = @ls_key-Salesdocumentnumber.
 
-      IF ls_resp_status-code = '200' OR ls_resp_status-code = '201'.
+*      ENDIF.
 
-        UPDATE zsalesorder_hdr SET status =  3  , created_by = @sy-uname , created_at = @lv_created_on WHERE salesdocumentnumber = @ls_key-Salesdocumentnumber.
-
-      ELSE.
-        UPDATE zsalesorder_hdr SET status = 4 , created_by = @sy-uname , created_at = @lv_created_on WHERE salesdocumentnumber = @ls_key-Salesdocumentnumber.
-
-        DATA ls_message TYPE zsalesorder_msg.
-
-      ENDIF.
+      DATA ls_message TYPE zsalesorder_msg.
 
       ls_message-message_no = 1.
 
@@ -191,11 +202,53 @@ CLASS lhc_SalesOrder IMPLEMENTATION.
       SPLIT lv_response AT '<message xml:lang="en">' INTO DATA(lv_xml_part1) DATA(lv_exml_part2).
       SPLIT lv_exml_part2 AT '</message>' INTO DATA(lv_error_message) lv_exml_part2.
 
+      SPLIT lv_response AT '<d:Vbeln>' INTO DATA(lv_xml_vbeln) DATA(lv_xml_vbeln2).
+      SPLIT lv_xml_vbeln2 AT '</d:Vbeln>' INTO DATA(lv_vbeln) lv_xml_vbeln2.
+
+
+      GET TIME STAMP FIELD DATA(lv_created_on).
+
+      DELETE FROM zsalesorder_msg WHERE salesdocumentnumber = @ls_key-Salesdocumentnumber.
+
+      IF ( lv_vbeln IS NOT INITIAL ) . "and lo_response-data-d-Vbeln is not INITIAL.
+
+        UPDATE zsalesorder_hdr SET status =  3  , created_by = @sy-uname , created_at = @lv_created_on WHERE salesdocumentnumber = @ls_key-Salesdocumentnumber.
+
+      ELSE.
+        UPDATE zsalesorder_hdr SET status = 4 , created_by = @sy-uname , created_at = @lv_created_on WHERE salesdocumentnumber = @ls_key-Salesdocumentnumber.
+
+      ENDIF.
+
+
+      IF lv_error_message IS NOT INITIAL.
+
       ls_message-comments = lv_error_message.
+
+      ELSEIF lv_vbeln IS NOT INITIAL.
+
+      ls_message-comments = 'Vbeln Number =' && lv_vbeln.
+
+      else.
+
+      ls_message-comments = 'Wrong input values! Please correct it!'.
+
+      ENDIF.
 
       INSERT zsalesorder_msg FROM @ls_message.
 
+      "Get the response updated Record
+      READ ENTITIES OF zsalesorder_hdr_i IN LOCAL MODE
+      ENTITY SalesOrder
+      ALL FIELDS WITH CORRESPONDING #( keys )
+      RESULT DATA(SalesOrderData).
+      result = VALUE #( FOR SalesOrerRec in SalesOrderData
+      ( %tky = salesorerrec-%tky %param = salesorerrec )
+       ).
+
+
     ENDLOOP.
+
   ENDMETHOD.
+
 
 ENDCLASS.

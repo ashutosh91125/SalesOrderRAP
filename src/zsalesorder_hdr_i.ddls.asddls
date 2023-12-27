@@ -31,9 +31,9 @@ association to zsales_status as _Status
     @EndUserText.label: 'Status'
     status as Status,
     case status
-      when '0' then 0 
-      when '3' then 1
-      when '4' then 3
+      when '0' then 2 
+      when '3' then 3
+      when '4' then 1
       else 0 
       end as criticality,
       @EndUserText.label: 'Created By'

@@ -90,11 +90,11 @@ define root view entity zsalesorder_hdr_c
       }
     Partnrole,
     @UI: {
-            selectionField : [{position: 120}],
-            lineItem : [{position: 510,criticality:'criticality', importance: #HIGH},{ type: #FOR_ACTION, dataAction: 'transferData', label: 'Transfer Data' }
+            selectionField : [{position: 20}],
+            lineItem : [{position: 120,criticality:'criticality', importance: #HIGH},{ type: #FOR_ACTION, dataAction: 'transferData', label: 'Transfer Data' }
 
             ],
-            identification: [{position: 510}]
+            identification: [{position: 120}]
 
         }
        
